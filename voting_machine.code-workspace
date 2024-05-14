@@ -6,6 +6,9 @@
     },
     {
       "path": "projects/voting_machine"
+    },
+    {
+      "path": "projects/frontend"
     }
   ],
   "settings": {
