@@ -106,17 +106,18 @@ class VotingRoundApp(ARC4Contract):
         self.close_time.value = Global.latest_timestamp
 
         note = (
-            '{"standard" : "arc69",'
-            '"description": "This is a voting result NFT for voting round with ID '
+            '{"standard":"arc69",'
+            '"description":"This is a voting result NFT for voting round with ID '
             + self.vote_id
-            + '.", "properties": {"metadata": ipfs://'
+            + '.","properties":{"metadata":"ipfs://'
             + self.metadata_ipfs_cid
-            + '","id": "'
+            + '","id":"'
             + self.vote_id
+            + '","quorum":'
             + itoa(self.quorum)
             + ',"voterCount":'
             + itoa(self.voter_count)
-            + ', "tallies": ['
+            + ',"tallies":['
         )
 
         current_index = UInt64(0)
@@ -149,7 +150,7 @@ class VotingRoundApp(ARC4Contract):
         )
 
     @arc4.abimethod(readonly=False)
-    def get_preconditions(self, signature: Bytes):
+    def get_preconditions(self, signature: Bytes) -> VotingPreconditions:
         return VotingPreconditions(
             is_voting_open=arc4.UInt64(self.voting_open()),
             is_allowed_to_vote=arc4.UInt64(self.allowed_to_vote(signature)),
@@ -233,26 +234,29 @@ class VotingRoundApp(ARC4Contract):
             Txn.sender.bytes, signature, self.snapshot_public_key
         )
 
-    @subroutine
-    def get_vote_from_box(index: UInt64) -> UInt64:
-        box_data, exists = op.Box.get(TALLY_BOX_KEY)
-        assert exists
-        return op.btoi(op.extract(box_data, index, VOTE_COUNT_BYTES))
 
-    @subroutine
-    def increment_vote_in_box(index: UInt64) -> None:
-        box_data, exists = op.Box.get(TALLY_BOX_KEY)
-        assert exists
-        current_vote = op.btoi(op.extract(box_data, index, VOTE_COUNT_BYTES))
+@subroutine
+def get_vote_from_box(index: UInt64) -> UInt64:
+    box_data, exists = op.Box.get(TALLY_BOX_KEY)
+    assert exists
+    return op.btoi(op.extract(box_data, index, VOTE_COUNT_BYTES))
 
-        op.Box.replace(TALLY_BOX_KEY, index, op.itob(current_vote + 1))
 
-    @subroutine
-    def itoa(i: UInt64) -> String:
-        digits = Bytes(b"0123456789")
-        radix = digits.length
+@subroutine
+def increment_vote_in_box(index: UInt64) -> None:
+    box_data, exists = op.Box.get(TALLY_BOX_KEY)
+    assert exists
+    current_vote = op.btoi(op.extract(box_data, index, VOTE_COUNT_BYTES))
 
-        if i < radix:
-            return String.from_bytes(digits[i])
+    op.Box.replace(TALLY_BOX_KEY, index, op.itob(current_vote + 1))
 
-        return itoa(i // radix) + String.from_bytes(digits[i % radix])
+
+@subroutine
+def itoa(i: UInt64) -> String:
+    digits = Bytes(b"0123456789")
+    radix = digits.length
+
+    if i < radix:
+        return String.from_bytes(digits[i])
+
+    return itoa(i // radix) + String.from_bytes(digits[i % radix])
