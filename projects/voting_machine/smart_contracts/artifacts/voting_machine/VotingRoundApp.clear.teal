@@ -1,0 +1,7 @@
+#pragma version 10
+
+smart_contracts.voting_machine.contract.VotingRoundApp.clear_state_program:
+    // smart_contracts/voting_machine/contract.py:43
+    // class VotingRoundApp(ARC4Contract):
+    int 1
+    return

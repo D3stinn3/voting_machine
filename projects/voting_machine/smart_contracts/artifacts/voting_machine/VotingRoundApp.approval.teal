@@ -1,0 +1,1285 @@
+#pragma version 10
+
+smart_contracts.voting_machine.contract.VotingRoundApp.approval_program:
+    txn ApplicationID
+    bnz main_entrypoint@2
+    callsub __init__
+
+main_entrypoint@2:
+    // smart_contracts/voting_machine/contract.py:43
+    // class VotingRoundApp(ARC4Contract):
+    method "create(string,byte[],string,uint64,uint64,uint8[],uint64,string)void"
+    method "bootstrap(pay)void"
+    method "close()void"
+    method "get_preconditions(byte[])(uint64,uint64,uint64,uint64)"
+    method "vote(pay,byte[],uint8[])void"
+    txna ApplicationArgs 0
+    match main_create_route@3 main_bootstrap_route@4 main_close_route@5 main_get_preconditions_route@6 main_vote_route@7
+    err // reject transaction
+
+main_create_route@3:
+    // smart_contracts/voting_machine/contract.py:51
+    // @arc4.abimethod(create="require")
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    !
+    assert // is creating
+    // smart_contracts/voting_machine/contract.py:43
+    // class VotingRoundApp(ARC4Contract):
+    txna ApplicationArgs 1
+    extract 2 0
+    txna ApplicationArgs 2
+    extract 2 0
+    txna ApplicationArgs 3
+    extract 2 0
+    txna ApplicationArgs 4
+    btoi
+    txna ApplicationArgs 5
+    btoi
+    txna ApplicationArgs 6
+    txna ApplicationArgs 7
+    btoi
+    txna ApplicationArgs 8
+    extract 2 0
+    // smart_contracts/voting_machine/contract.py:51
+    // @arc4.abimethod(create="require")
+    callsub create
+    int 1
+    return
+
+main_bootstrap_route@4:
+    // smart_contracts/voting_machine/contract.py:75
+    // @arc4.abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // smart_contracts/voting_machine/contract.py:43
+    // class VotingRoundApp(ARC4Contract):
+    txn GroupIndex
+    int 1
+    -
+    dup
+    gtxns TypeEnum
+    int pay
+    ==
+    assert // transaction type is pay
+    // smart_contracts/voting_machine/contract.py:75
+    // @arc4.abimethod
+    callsub bootstrap
+    int 1
+    return
+
+main_close_route@5:
+    // smart_contracts/voting_machine/contract.py:101
+    // @arc4.abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    callsub close
+    int 1
+    return
+
+main_get_preconditions_route@6:
+    // smart_contracts/voting_machine/contract.py:152
+    // @arc4.abimethod(readonly=False)
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // smart_contracts/voting_machine/contract.py:43
+    // class VotingRoundApp(ARC4Contract):
+    txna ApplicationArgs 1
+    extract 2 0
+    // smart_contracts/voting_machine/contract.py:152
+    // @arc4.abimethod(readonly=False)
+    callsub get_preconditions
+    byte 0x151f7c75
+    swap
+    concat
+    log
+    int 1
+    return
+
+main_vote_route@7:
+    // smart_contracts/voting_machine/contract.py:161
+    // @arc4.abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    // smart_contracts/voting_machine/contract.py:43
+    // class VotingRoundApp(ARC4Contract):
+    txn GroupIndex
+    int 1
+    -
+    dup
+    gtxns TypeEnum
+    int pay
+    ==
+    assert // transaction type is pay
+    txna ApplicationArgs 1
+    extract 2 0
+    txna ApplicationArgs 2
+    // smart_contracts/voting_machine/contract.py:161
+    // @arc4.abimethod
+    callsub vote
+    int 1
+    return
+
+
+// smart_contracts.voting_machine.contract.VotingRoundApp.create(vote_id: bytes, snapshot_public_key: bytes, metadata_ipfs_cid: bytes, start_time: uint64, end_time: uint64, option_counts: bytes, quorum: uint64, nft_image_url: bytes) -> void:
+create:
+    // smart_contracts/voting_machine/contract.py:51-62
+    // @arc4.abimethod(create="require")
+    // def create(
+    //     self,
+    //     vote_id: String,
+    //     snapshot_public_key: Bytes,
+    //     metadata_ipfs_cid: String,
+    //     start_time: UInt64,
+    //     end_time: UInt64,
+    //     option_counts: VoteIndexArray,
+    //     quorum: UInt64,
+    //     nft_image_url: String,
+    // ) -> None:
+    proto 8 0
+    // smart_contracts/voting_machine/contract.py:63
+    // assert start_time < end_time
+    frame_dig -5
+    frame_dig -4
+    <
+    assert
+    // smart_contracts/voting_machine/contract.py:64
+    // assert end_time >= Global.latest_timestamp
+    frame_dig -4
+    global LatestTimestamp
+    >=
+    assert
+    // smart_contracts/voting_machine/contract.py:66
+    // self.vote_id = vote_id
+    byte "vote_id"
+    frame_dig -8
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:67
+    // self.snapshot_public_key = snapshot_public_key
+    byte "snapshot_public_key"
+    frame_dig -7
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:68
+    // self.metadata_ipfs_cid = metadata_ipfs_cid
+    byte "metadata_ipfs_cid"
+    frame_dig -6
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:69
+    // self.start_time = start_time
+    byte "start_time"
+    frame_dig -5
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:70
+    // self.end_time = end_time
+    byte "end_time"
+    frame_dig -4
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:71
+    // self.quorum = quorum
+    byte "quorum"
+    frame_dig -2
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:72
+    // self.nft_image_url = nft_image_url
+    byte "nft_image_url"
+    frame_dig -1
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:73
+    // self.store_option_counts(option_counts.copy())
+    frame_dig -3
+    callsub store_option_counts
+    pop
+    retsub
+
+
+// smart_contracts.voting_machine.contract.VotingRoundApp.store_option_counts(option_counts: bytes) -> bytes:
+store_option_counts:
+    // smart_contracts/voting_machine/contract.py:214-215
+    // @subroutine
+    // def store_option_counts(self, option_counts: VoteIndexArray) -> None:
+    proto 1 1
+    // smart_contracts/voting_machine/contract.py:217
+    // assert option_counts.length
+    frame_dig -1
+    int 0
+    extract_uint16
+    dupn 2
+    assert
+    // smart_contracts/voting_machine/contract.py:218
+    // assert option_counts.length <= 112
+    int 112
+    <=
+    assert
+    // smart_contracts/voting_machine/contract.py:220
+    // total_options = UInt64(0)
+    int 0
+    // smart_contracts/voting_machine/contract.py:222
+    // for item in option_counts:
+    frame_dig -1
+    extract 2 0
+    int 0
+
+store_option_counts_for_header@1:
+    // smart_contracts/voting_machine/contract.py:222
+    // for item in option_counts:
+    frame_dig 3
+    frame_dig 0
+    <
+    bz store_option_counts_after_for@4
+    frame_dig 2
+    frame_dig 3
+    dup
+    cover 2
+    int 1
+    extract3
+    // smart_contracts/voting_machine/contract.py:223
+    // total_options += item.native
+    btoi
+    frame_dig 1
+    +
+    frame_bury 1
+    int 1
+    +
+    frame_bury 3
+    b store_option_counts_for_header@1
+
+store_option_counts_after_for@4:
+    // smart_contracts/voting_machine/contract.py:225
+    // assert total_options <= 128
+    frame_dig 1
+    dup
+    int 128
+    <=
+    assert
+    // smart_contracts/voting_machine/contract.py:227
+    // self.option_counts = option_counts.copy()
+    byte "option_counts"
+    frame_dig -1
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:228
+    // self.total_options = total_options
+    byte "total_options"
+    swap
+    app_global_put
+    frame_dig -1
+    frame_bury 0
+    retsub
+
+
+// smart_contracts.voting_machine.contract.VotingRoundApp.bootstrap(fund_min_bal_req: uint64) -> void:
+bootstrap:
+    // smart_contracts/voting_machine/contract.py:75-76
+    // @arc4.abimethod
+    // def bootstrap(self, fund_min_bal_req: gtxn.PaymentTransaction) -> None:
+    proto 1 0
+    // smart_contracts/voting_machine/contract.py:77-78
+    // # Certain that not bootstrapped
+    // assert not self.is_bootstrapped
+    int 0
+    byte "is_bootstrapped"
+    app_global_get_ex
+    assert // check is_bootstrapped exists
+    !
+    assert
+    // smart_contracts/voting_machine/contract.py:80
+    // self.is_bootstrapped = True
+    byte "is_bootstrapped"
+    int 1
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:82
+    // assert fund_min_bal_req.receiver == Global.current_application_address
+    frame_dig -1
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    assert
+    // smart_contracts/voting_machine/contract.py:84
+    // tally_box_size = self.total_options * VOTE_COUNT_BYTES
+    int 0
+    byte "total_options"
+    app_global_get_ex
+    assert // check total_options exists
+    int 8
+    *
+    // smart_contracts/voting_machine/contract.py:92-93
+    // # tally box key
+    // + (tally_box_size * BOX_BYTE_MIN_BALANCE)
+    dup
+    int 400
+    *
+    // smart_contracts/voting_machine/contract.py:86-91
+    // # minimum balance required for: ALGO + Vote result NFT asset
+    // ASSET_MIN_BALANCE * 2
+    // # create NFT fee
+    // + 1000
+    // # tally box
+    // + BOX_FLAT_MIN_BALANCE
+    int 203500
+    // smart_contracts/voting_machine/contract.py:86-93
+    // # minimum balance required for: ALGO + Vote result NFT asset
+    // ASSET_MIN_BALANCE * 2
+    // # create NFT fee
+    // + 1000
+    // # tally box
+    // + BOX_FLAT_MIN_BALANCE
+    // # tally box key
+    // + (tally_box_size * BOX_BYTE_MIN_BALANCE)
+    +
+    // smart_contracts/voting_machine/contract.py:96
+    // log(min_balance_required)
+    dup
+    itob
+    log
+    // smart_contracts/voting_machine/contract.py:97
+    // assert fund_min_bal_req.amount == min_balance_required
+    frame_dig -1
+    gtxns Amount
+    ==
+    assert
+    // smart_contracts/voting_machine/contract.py:99
+    // assert op.Box.create(TALLY_BOX_KEY, tally_box_size)
+    byte "V"
+    swap
+    box_create
+    assert
+    retsub
+
+
+// smart_contracts.voting_machine.contract.VotingRoundApp.close() -> void:
+close:
+    // smart_contracts/voting_machine/contract.py:101-102
+    // @arc4.abimethod
+    // def close(self) -> None:
+    proto 0 0
+    int 0
+    dup
+    byte ""
+    dupn 2
+    // smart_contracts/voting_machine/contract.py:103
+    // ensure_budget(20000, fee_source=OpUpFeeSource.GroupCredit)
+    int 20000
+    int 0
+    callsub ensure_budget
+    // smart_contracts/voting_machine/contract.py:105
+    // assert not self.close_time
+    int 0
+    byte "close_time"
+    app_global_get_ex
+    bury 1
+    !
+    assert
+    // smart_contracts/voting_machine/contract.py:106
+    // self.close_time.value = Global.latest_timestamp
+    byte "close_time"
+    global LatestTimestamp
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:111
+    // + self.vote_id
+    int 0
+    byte "vote_id"
+    app_global_get_ex
+    assert // check vote_id exists
+    // smart_contracts/voting_machine/contract.py:109-110
+    // '{"standard":"arc69",'
+    // '"description":"This is a voting result NFT for voting round with ID '
+    byte "{\"standard\":\"arc69\",\"description\":\"This is a voting result NFT for voting round with ID "
+    // smart_contracts/voting_machine/contract.py:109-111
+    // '{"standard":"arc69",'
+    // '"description":"This is a voting result NFT for voting round with ID '
+    // + self.vote_id
+    swap
+    concat
+    // smart_contracts/voting_machine/contract.py:112
+    // + '.","properties":{"metadata":"ipfs://'
+    byte ".\",\"properties\":{\"metadata\":\"ipfs://"
+    // smart_contracts/voting_machine/contract.py:109-112
+    // '{"standard":"arc69",'
+    // '"description":"This is a voting result NFT for voting round with ID '
+    // + self.vote_id
+    // + '.","properties":{"metadata":"ipfs://'
+    concat
+    // smart_contracts/voting_machine/contract.py:113
+    // + self.metadata_ipfs_cid
+    int 0
+    byte "metadata_ipfs_cid"
+    app_global_get_ex
+    assert // check metadata_ipfs_cid exists
+    // smart_contracts/voting_machine/contract.py:109-113
+    // '{"standard":"arc69",'
+    // '"description":"This is a voting result NFT for voting round with ID '
+    // + self.vote_id
+    // + '.","properties":{"metadata":"ipfs://'
+    // + self.metadata_ipfs_cid
+    concat
+    // smart_contracts/voting_machine/contract.py:114
+    // + '","id":"'
+    byte "\",\"id\":\""
+    // smart_contracts/voting_machine/contract.py:109-114
+    // '{"standard":"arc69",'
+    // '"description":"This is a voting result NFT for voting round with ID '
+    // + self.vote_id
+    // + '.","properties":{"metadata":"ipfs://'
+    // + self.metadata_ipfs_cid
+    // + '","id":"'
+    concat
+    // smart_contracts/voting_machine/contract.py:115
+    // + self.vote_id
+    int 0
+    byte "vote_id"
+    app_global_get_ex
+    assert // check vote_id exists
+    // smart_contracts/voting_machine/contract.py:109-115
+    // '{"standard":"arc69",'
+    // '"description":"This is a voting result NFT for voting round with ID '
+    // + self.vote_id
+    // + '.","properties":{"metadata":"ipfs://'
+    // + self.metadata_ipfs_cid
+    // + '","id":"'
+    // + self.vote_id
+    concat
+    // smart_contracts/voting_machine/contract.py:116
+    // + '","quorum":'
+    byte "\",\"quorum\":"
+    // smart_contracts/voting_machine/contract.py:109-116
+    // '{"standard":"arc69",'
+    // '"description":"This is a voting result NFT for voting round with ID '
+    // + self.vote_id
+    // + '.","properties":{"metadata":"ipfs://'
+    // + self.metadata_ipfs_cid
+    // + '","id":"'
+    // + self.vote_id
+    // + '","quorum":'
+    concat
+    // smart_contracts/voting_machine/contract.py:117
+    // + itoa(self.quorum)
+    int 0
+    byte "quorum"
+    app_global_get_ex
+    assert // check quorum exists
+    callsub itoa
+    // smart_contracts/voting_machine/contract.py:109-117
+    // '{"standard":"arc69",'
+    // '"description":"This is a voting result NFT for voting round with ID '
+    // + self.vote_id
+    // + '.","properties":{"metadata":"ipfs://'
+    // + self.metadata_ipfs_cid
+    // + '","id":"'
+    // + self.vote_id
+    // + '","quorum":'
+    // + itoa(self.quorum)
+    concat
+    // smart_contracts/voting_machine/contract.py:118
+    // + ',"voterCount":'
+    byte ",\"voterCount\":"
+    // smart_contracts/voting_machine/contract.py:109-118
+    // '{"standard":"arc69",'
+    // '"description":"This is a voting result NFT for voting round with ID '
+    // + self.vote_id
+    // + '.","properties":{"metadata":"ipfs://'
+    // + self.metadata_ipfs_cid
+    // + '","id":"'
+    // + self.vote_id
+    // + '","quorum":'
+    // + itoa(self.quorum)
+    // + ',"voterCount":'
+    concat
+    // smart_contracts/voting_machine/contract.py:119
+    // + itoa(self.voter_count)
+    int 0
+    byte "voter_count"
+    app_global_get_ex
+    assert // check voter_count exists
+    callsub itoa
+    // smart_contracts/voting_machine/contract.py:109-119
+    // '{"standard":"arc69",'
+    // '"description":"This is a voting result NFT for voting round with ID '
+    // + self.vote_id
+    // + '.","properties":{"metadata":"ipfs://'
+    // + self.metadata_ipfs_cid
+    // + '","id":"'
+    // + self.vote_id
+    // + '","quorum":'
+    // + itoa(self.quorum)
+    // + ',"voterCount":'
+    // + itoa(self.voter_count)
+    concat
+    // smart_contracts/voting_machine/contract.py:120
+    // + ',"tallies":['
+    byte ",\"tallies\":["
+    // smart_contracts/voting_machine/contract.py:109-120
+    // '{"standard":"arc69",'
+    // '"description":"This is a voting result NFT for voting round with ID '
+    // + self.vote_id
+    // + '.","properties":{"metadata":"ipfs://'
+    // + self.metadata_ipfs_cid
+    // + '","id":"'
+    // + self.vote_id
+    // + '","quorum":'
+    // + itoa(self.quorum)
+    // + ',"voterCount":'
+    // + itoa(self.voter_count)
+    // + ',"tallies":['
+    concat
+    // smart_contracts/voting_machine/contract.py:123
+    // current_index = UInt64(0)
+    int 0
+    // smart_contracts/voting_machine/contract.py:125
+    // for question_index, question_options in uenumerate(self.option_counts):
+    dup
+    byte "option_counts"
+    app_global_get_ex
+    assert // check option_counts exists
+    dup
+    int 0
+    extract_uint16
+    swap
+    extract 2 0
+    int 0
+
+close_for_header@1:
+    // smart_contracts/voting_machine/contract.py:125
+    // for question_index, question_options in uenumerate(self.option_counts):
+    frame_dig 9
+    frame_dig 7
+    <
+    bz close_after_for@15
+    frame_dig 8
+    frame_dig 9
+    dup
+    cover 2
+    int 1
+    extract3
+    frame_bury 1
+    frame_dig 5
+    frame_bury 0
+    // smart_contracts/voting_machine/contract.py:126
+    // if question_index > 0:
+    bz close_after_if_else@4
+    // smart_contracts/voting_machine/contract.py:127
+    // note += ","
+    frame_dig 5
+    byte ","
+    concat
+    frame_bury 0
+
+close_after_if_else@4:
+    frame_dig 0
+    dup
+    frame_bury 5
+    // smart_contracts/voting_machine/contract.py:128
+    // if question_options > 0:
+    frame_dig 1
+    byte 0x00
+    b>
+    frame_dig 6
+    frame_bury 2
+    swap
+    frame_bury 0
+    bz close_after_if_else@13
+    // smart_contracts/voting_machine/contract.py:129
+    // note += "["
+    frame_dig 5
+    byte "["
+    concat
+    frame_bury 5
+    // smart_contracts/voting_machine/contract.py:130
+    // for option_index in urange(question_options.native):
+    frame_dig 1
+    btoi
+    frame_bury 4
+    int 0
+    frame_bury 3
+
+close_for_header@6:
+    // smart_contracts/voting_machine/contract.py:130
+    // for option_index in urange(question_options.native):
+    frame_dig 3
+    frame_dig 4
+    <
+    bz close_after_for@12
+    frame_dig 5
+    frame_bury 0
+    // smart_contracts/voting_machine/contract.py:131
+    // if option_index > 0:
+    frame_dig 3
+    bz close_after_if_else@9
+    // smart_contracts/voting_machine/contract.py:132
+    // note += ","
+    frame_dig 5
+    byte ","
+    concat
+    frame_bury 0
+
+close_after_if_else@9:
+    frame_dig 0
+    // smart_contracts/voting_machine/contract.py:133
+    // votes_for_option = get_vote_from_box(current_index)
+    frame_dig 6
+    dup
+    cover 2
+    callsub get_vote_from_box
+    // smart_contracts/voting_machine/contract.py:134
+    // note += itoa(votes_for_option)
+    callsub itoa
+    concat
+    frame_bury 5
+    // smart_contracts/voting_machine/contract.py:135
+    // current_index += 1
+    int 1
+    +
+    frame_bury 6
+    // smart_contracts/voting_machine/contract.py:130
+    // for option_index in urange(question_options.native):
+    frame_dig 3
+    int 1
+    +
+    frame_bury 3
+    b close_for_header@6
+
+close_after_for@12:
+    // smart_contracts/voting_machine/contract.py:136
+    // note += "]"
+    frame_dig 5
+    byte "]"
+    concat
+    frame_dig 6
+    frame_bury 2
+    frame_bury 0
+
+close_after_if_else@13:
+    frame_dig 2
+    frame_bury 6
+    frame_dig 0
+    frame_bury 5
+    frame_dig 9
+    int 1
+    +
+    frame_bury 9
+    b close_for_header@1
+
+close_after_for@15:
+    // smart_contracts/voting_machine/contract.py:137
+    // note += "]}}"
+    frame_dig 5
+    byte "]}}"
+    concat
+    // smart_contracts/voting_machine/contract.py:139-148
+    // itxn.AssetConfig(
+    //     total=1,
+    //     decimals=0,
+    //     default_frozen=False,
+    //     asset_name="[VOTE RESULT] " + self.vote_id,
+    //     unit_name="VOTERSLT",
+    //     url=self.nft_image_url,
+    //     note=note,
+    // )
+    // .submit()
+    itxn_begin
+    // smart_contracts/voting_machine/contract.py:143
+    // asset_name="[VOTE RESULT] " + self.vote_id,
+    int 0
+    byte "vote_id"
+    app_global_get_ex
+    assert // check vote_id exists
+    byte "[VOTE RESULT] "
+    swap
+    concat
+    // smart_contracts/voting_machine/contract.py:145
+    // url=self.nft_image_url,
+    int 0
+    byte "nft_image_url"
+    app_global_get_ex
+    assert // check nft_image_url exists
+    uncover 2
+    itxn_field Note
+    itxn_field ConfigAssetURL
+    // smart_contracts/voting_machine/contract.py:144
+    // unit_name="VOTERSLT",
+    byte "VOTERSLT"
+    itxn_field ConfigAssetUnitName
+    itxn_field ConfigAssetName
+    // smart_contracts/voting_machine/contract.py:142
+    // default_frozen=False,
+    int 0
+    itxn_field ConfigAssetDefaultFrozen
+    // smart_contracts/voting_machine/contract.py:141
+    // decimals=0,
+    int 0
+    itxn_field ConfigAssetDecimals
+    // smart_contracts/voting_machine/contract.py:140
+    // total=1,
+    int 1
+    itxn_field ConfigAssetTotal
+    // smart_contracts/voting_machine/contract.py:139
+    // itxn.AssetConfig(
+    int acfg
+    itxn_field TypeEnum
+    int 0
+    itxn_field Fee
+    // smart_contracts/voting_machine/contract.py:139-148
+    // itxn.AssetConfig(
+    //     total=1,
+    //     decimals=0,
+    //     default_frozen=False,
+    //     asset_name="[VOTE RESULT] " + self.vote_id,
+    //     unit_name="VOTERSLT",
+    //     url=self.nft_image_url,
+    //     note=note,
+    // )
+    // .submit()
+    itxn_submit
+    // smart_contracts/voting_machine/contract.py:138
+    // self.nft_asset_id = (
+    byte "nft_asset_id"
+    // smart_contracts/voting_machine/contract.py:139-149
+    // itxn.AssetConfig(
+    //     total=1,
+    //     decimals=0,
+    //     default_frozen=False,
+    //     asset_name="[VOTE RESULT] " + self.vote_id,
+    //     unit_name="VOTERSLT",
+    //     url=self.nft_image_url,
+    //     note=note,
+    // )
+    // .submit()
+    // .created_asset.id
+    itxn CreatedAssetID
+    // smart_contracts/voting_machine/contract.py:138-150
+    // self.nft_asset_id = (
+    //     itxn.AssetConfig(
+    //         total=1,
+    //         decimals=0,
+    //         default_frozen=False,
+    //         asset_name="[VOTE RESULT] " + self.vote_id,
+    //         unit_name="VOTERSLT",
+    //         url=self.nft_image_url,
+    //         note=note,
+    //     )
+    //     .submit()
+    //     .created_asset.id
+    // )
+    app_global_put
+    retsub
+
+
+// algopy.ensure_budget(required_budget: uint64, fee_source: uint64) -> void:
+ensure_budget:
+    // <algopy>/algopy.py:11-17
+    proto 2 0
+    // <algopy>/algopy.py:18
+    frame_dig -2
+    int 10
+    +
+
+ensure_budget_while_top@1:
+    // <algopy>/algopy.py:19
+    frame_dig 0
+    global OpcodeBudget
+    >
+    bz ensure_budget_after_while@7
+    // <algopy>/algopy.py:20
+    itxn_begin
+    // <algopy>/algopy.py:21
+    int appl
+    itxn_field TypeEnum
+    // <algopy>/algopy.py:22
+    int DeleteApplication
+    itxn_field OnCompletion
+    // <algopy>/algopy.py:23
+    byte 0x068101
+    itxn_field ApprovalProgram
+    // <algopy>/algopy.py:24
+    byte 0x068101
+    itxn_field ClearStateProgram
+    // <algopy>/algopy.py:25-29
+    frame_dig -1
+    switch ensure_budget_switch_case_0@3 ensure_budget_switch_case_1@4
+    b ensure_budget_switch_case_next@6
+
+ensure_budget_switch_case_0@3:
+    // <algopy>/algopy.py:27
+    int 0
+    itxn_field Fee
+    b ensure_budget_switch_case_next@6
+
+ensure_budget_switch_case_1@4:
+    // <algopy>/algopy.py:29
+    global MinTxnFee
+    itxn_field Fee
+
+ensure_budget_switch_case_next@6:
+    // <algopy>/algopy.py:30
+    itxn_submit
+    b ensure_budget_while_top@1
+
+ensure_budget_after_while@7:
+    retsub
+
+
+// smart_contracts.voting_machine.contract.itoa(i: uint64) -> bytes:
+itoa:
+    // smart_contracts/voting_machine/contract.py:254-255
+    // @subroutine
+    // def itoa(i: UInt64) -> String:
+    proto 1 1
+    // smart_contracts/voting_machine/contract.py:259
+    // if i < radix:
+    frame_dig -1
+    // smart_contracts/voting_machine/contract.py:257
+    // radix = digits.length
+    int 10
+    // smart_contracts/voting_machine/contract.py:259
+    // if i < radix:
+    <
+    bz itoa_after_if_else@2
+    // smart_contracts/voting_machine/contract.py:260
+    // return String.from_bytes(digits[i])
+    frame_dig -1
+    int 1
+    +
+    // smart_contracts/voting_machine/contract.py:256
+    // digits = Bytes(b"0123456789")
+    byte "0123456789"
+    // smart_contracts/voting_machine/contract.py:260
+    // return String.from_bytes(digits[i])
+    frame_dig -1
+    uncover 2
+    substring3
+    retsub
+
+itoa_after_if_else@2:
+    // smart_contracts/voting_machine/contract.py:262
+    // return itoa(i // radix) + String.from_bytes(digits[i % radix])
+    frame_dig -1
+    // smart_contracts/voting_machine/contract.py:257
+    // radix = digits.length
+    int 10
+    // smart_contracts/voting_machine/contract.py:262
+    // return itoa(i // radix) + String.from_bytes(digits[i % radix])
+    /
+    callsub itoa
+    frame_dig -1
+    // smart_contracts/voting_machine/contract.py:257
+    // radix = digits.length
+    int 10
+    // smart_contracts/voting_machine/contract.py:262
+    // return itoa(i // radix) + String.from_bytes(digits[i % radix])
+    %
+    dup
+    int 1
+    +
+    // smart_contracts/voting_machine/contract.py:256
+    // digits = Bytes(b"0123456789")
+    byte "0123456789"
+    // smart_contracts/voting_machine/contract.py:262
+    // return itoa(i // radix) + String.from_bytes(digits[i % radix])
+    cover 2
+    substring3
+    concat
+    retsub
+
+
+// smart_contracts.voting_machine.contract.get_vote_from_box(index: uint64) -> uint64:
+get_vote_from_box:
+    // smart_contracts/voting_machine/contract.py:238-239
+    // @subroutine
+    // def get_vote_from_box(index: UInt64) -> UInt64:
+    proto 1 1
+    // smart_contracts/voting_machine/contract.py:240
+    // box_data, exists = op.Box.get(TALLY_BOX_KEY)
+    byte "V"
+    box_get
+    // smart_contracts/voting_machine/contract.py:241
+    // assert exists
+    assert
+    // smart_contracts/voting_machine/contract.py:242
+    // return op.btoi(op.extract(box_data, index, VOTE_COUNT_BYTES))
+    frame_dig -1
+    int 8
+    extract3
+    btoi
+    retsub
+
+
+// smart_contracts.voting_machine.contract.VotingRoundApp.get_preconditions(signature: bytes) -> bytes:
+get_preconditions:
+    // smart_contracts/voting_machine/contract.py:152-153
+    // @arc4.abimethod(readonly=False)
+    // def get_preconditions(self, signature: Bytes) -> VotingPreconditions:
+    proto 1 1
+    // smart_contracts/voting_machine/contract.py:155
+    // is_voting_open=arc4.UInt64(self.voting_open()),
+    callsub voting_open
+    itob
+    // smart_contracts/voting_machine/contract.py:156
+    // is_allowed_to_vote=arc4.UInt64(self.allowed_to_vote(signature)),
+    frame_dig -1
+    callsub allowed_to_vote
+    itob
+    // smart_contracts/voting_machine/contract.py:157
+    // has_already_voted=arc4.UInt64(self.already_voted()),
+    callsub already_voted
+    itob
+    // smart_contracts/voting_machine/contract.py:158
+    // current_time=arc4.UInt64(Global.latest_timestamp),
+    global LatestTimestamp
+    itob
+    // smart_contracts/voting_machine/contract.py:154-159
+    // return VotingPreconditions(
+    //     is_voting_open=arc4.UInt64(self.voting_open()),
+    //     is_allowed_to_vote=arc4.UInt64(self.allowed_to_vote(signature)),
+    //     has_already_voted=arc4.UInt64(self.already_voted()),
+    //     current_time=arc4.UInt64(Global.latest_timestamp),
+    // )
+    uncover 3
+    uncover 3
+    concat
+    uncover 2
+    concat
+    swap
+    concat
+    retsub
+
+
+// smart_contracts.voting_machine.contract.VotingRoundApp.voting_open() -> uint64:
+voting_open:
+    // smart_contracts/voting_machine/contract.py:201-202
+    // @subroutine
+    // def voting_open(self) -> bool:
+    proto 0 1
+    byte ""
+    // smart_contracts/voting_machine/contract.py:204
+    // self.is_bootstrapped
+    int 0
+    byte "is_bootstrapped"
+    app_global_get_ex
+    assert // check is_bootstrapped exists
+    // smart_contracts/voting_machine/contract.py:204-206
+    // self.is_bootstrapped
+    // and not self.close_time
+    // and self.start_time <= Global.latest_timestamp <= self.end_time
+    bz voting_open_bool_false@5
+    // smart_contracts/voting_machine/contract.py:205
+    // and not self.close_time
+    int 0
+    byte "close_time"
+    app_global_get_ex
+    bury 1
+    bnz voting_open_bool_false@5
+    // smart_contracts/voting_machine/contract.py:206
+    // and self.start_time <= Global.latest_timestamp <= self.end_time
+    int 0
+    byte "start_time"
+    app_global_get_ex
+    assert // check start_time exists
+    global LatestTimestamp
+    dup
+    frame_bury 0
+    <=
+    bz voting_open_bool_false@5
+    int 0
+    byte "end_time"
+    app_global_get_ex
+    assert // check end_time exists
+    frame_dig 0
+    >=
+    bz voting_open_bool_false@5
+    int 1
+    b voting_open_bool_merge@6
+
+voting_open_bool_false@5:
+    int 0
+
+voting_open_bool_merge@6:
+    // smart_contracts/voting_machine/contract.py:203-207
+    // return (
+    //     self.is_bootstrapped
+    //     and not self.close_time
+    //     and self.start_time <= Global.latest_timestamp <= self.end_time
+    // )
+    swap
+    retsub
+
+
+// smart_contracts.voting_machine.contract.VotingRoundApp.allowed_to_vote(signature: bytes) -> uint64:
+allowed_to_vote:
+    // smart_contracts/voting_machine/contract.py:230-231
+    // @subroutine
+    // def allowed_to_vote(self, signature: Bytes) -> bool:
+    proto 1 1
+    // smart_contracts/voting_machine/contract.py:232
+    // ensure_budget(2000)
+    int 2000
+    int 0
+    callsub ensure_budget
+    // smart_contracts/voting_machine/contract.py:234
+    // Txn.sender.bytes, signature, self.snapshot_public_key
+    txn Sender
+    int 0
+    byte "snapshot_public_key"
+    app_global_get_ex
+    assert // check snapshot_public_key exists
+    // smart_contracts/voting_machine/contract.py:233-235
+    // return op.ed25519verify_bare(
+    //     Txn.sender.bytes, signature, self.snapshot_public_key
+    // )
+    frame_dig -1
+    swap
+    ed25519verify_bare
+    retsub
+
+
+// smart_contracts.voting_machine.contract.VotingRoundApp.already_voted() -> uint64:
+already_voted:
+    // smart_contracts/voting_machine/contract.py:209-210
+    // @subroutine
+    // def already_voted(self) -> bool:
+    proto 0 1
+    // smart_contracts/voting_machine/contract.py:211
+    // (votes, exists) = op.Box.get(Txn.sender.bytes)
+    txn Sender
+    box_get
+    bury 1
+    // smart_contracts/voting_machine/contract.py:212
+    // return exists
+    retsub
+
+
+// smart_contracts.voting_machine.contract.VotingRoundApp.vote(fund_min_bal_req: uint64, signature: bytes, answer_ids: bytes) -> void:
+vote:
+    // smart_contracts/voting_machine/contract.py:161-167
+    // @arc4.abimethod
+    // def vote(
+    //     self,
+    //     fund_min_bal_req: gtxn.PaymentTransaction,
+    //     signature: Bytes,
+    //     answer_ids: VoteIndexArray,
+    // ) -> None:
+    proto 3 0
+    // smart_contracts/voting_machine/contract.py:168
+    // ensure_budget(7700, fee_source=OpUpFeeSource.GroupCredit)
+    int 7700
+    int 0
+    callsub ensure_budget
+    // smart_contracts/voting_machine/contract.py:170-171
+    // # Check voting preconditions
+    // assert self.allowed_to_vote(signature)
+    frame_dig -2
+    callsub allowed_to_vote
+    assert
+    // smart_contracts/voting_machine/contract.py:172
+    // assert self.voting_open()
+    callsub voting_open
+    assert
+    // smart_contracts/voting_machine/contract.py:173
+    // assert not self.already_voted()
+    callsub already_voted
+    !
+    assert
+    // smart_contracts/voting_machine/contract.py:174
+    // questions_count = self.option_counts.length
+    int 0
+    byte "option_counts"
+    app_global_get_ex
+    assert // check option_counts exists
+    int 0
+    extract_uint16
+    dup
+    // smart_contracts/voting_machine/contract.py:175
+    // assert answer_ids.length == questions_count
+    frame_dig -1
+    int 0
+    extract_uint16
+    dup
+    cover 2
+    dup
+    uncover 2
+    ==
+    assert
+    // smart_contracts/voting_machine/contract.py:179
+    // (32 + 2 + VOTE_INDEX_BYTES * answer_ids.length) * BOX_BYTE_MIN_BALANCE
+    int 34
+    +
+    int 400
+    *
+    // smart_contracts/voting_machine/contract.py:177-178
+    // # Check if voter box is funded
+    // min_bal_req = BOX_FLAT_MIN_BALANCE + (
+    int 2500
+    // smart_contracts/voting_machine/contract.py:177-180
+    // # Check if voter box is funded
+    // min_bal_req = BOX_FLAT_MIN_BALANCE + (
+    //     (32 + 2 + VOTE_INDEX_BYTES * answer_ids.length) * BOX_BYTE_MIN_BALANCE
+    // )
+    +
+    // smart_contracts/voting_machine/contract.py:182
+    // assert fund_min_bal_req.receiver == Global.current_application_address
+    frame_dig -3
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    assert
+    // smart_contracts/voting_machine/contract.py:184
+    // log(min_bal_req)
+    dup
+    itob
+    log
+    // smart_contracts/voting_machine/contract.py:185
+    // assert fund_min_bal_req.amount == min_bal_req
+    frame_dig -3
+    gtxns Amount
+    ==
+    assert
+    // smart_contracts/voting_machine/contract.py:187-188
+    // # Record vote for each question
+    // cumulative_offset = UInt64(0)
+    int 0
+    // smart_contracts/voting_machine/contract.py:190
+    // for question_index in urange(questions_count):
+    dup
+
+vote_for_header@1:
+    // smart_contracts/voting_machine/contract.py:190
+    // for question_index in urange(questions_count):
+    frame_dig 3
+    frame_dig 0
+    <
+    bz vote_after_for@5
+    // smart_contracts/voting_machine/contract.py:192-193
+    // # Load the users vote for this question
+    // answer_option_index = answer_ids[question_index].native
+    frame_dig 3
+    dup
+    frame_dig 1
+    <
+    assert // Index access is out of bounds
+    frame_dig -1
+    extract 2 0
+    dig 1
+    int 1
+    extract3
+    btoi
+    swap
+    // smart_contracts/voting_machine/contract.py:194
+    // options_count = self.option_counts[question_index].native
+    int 0
+    byte "option_counts"
+    app_global_get_ex
+    assert // check option_counts exists
+    dup
+    int 0
+    extract_uint16
+    dig 2
+    >
+    assert // Index access is out of bounds
+    extract 2 0
+    dig 1
+    int 1
+    extract3
+    btoi
+    // smart_contracts/voting_machine/contract.py:195
+    // assert answer_option_index < options_count
+    dig 2
+    dig 1
+    <
+    assert
+    // smart_contracts/voting_machine/contract.py:196
+    // increment_vote_in_box(cumulative_offset + answer_option_index)
+    frame_dig 2
+    dup
+    uncover 4
+    +
+    callsub increment_vote_in_box
+    // smart_contracts/voting_machine/contract.py:197
+    // cumulative_offset += options_count
+    +
+    frame_bury 2
+    // smart_contracts/voting_machine/contract.py:198
+    // op.Box.put(Txn.sender.bytes, answer_ids.bytes)
+    txn Sender
+    frame_dig -1
+    box_put
+    // smart_contracts/voting_machine/contract.py:199
+    // self.voter_count += 1
+    int 0
+    byte "voter_count"
+    app_global_get_ex
+    assert // check voter_count exists
+    int 1
+    +
+    byte "voter_count"
+    swap
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:190
+    // for question_index in urange(questions_count):
+    int 1
+    +
+    frame_bury 3
+    b vote_for_header@1
+
+vote_after_for@5:
+    retsub
+
+
+// smart_contracts.voting_machine.contract.increment_vote_in_box(index: uint64) -> void:
+increment_vote_in_box:
+    // smart_contracts/voting_machine/contract.py:245-246
+    // @subroutine
+    // def increment_vote_in_box(index: UInt64) -> None:
+    proto 1 0
+    // smart_contracts/voting_machine/contract.py:247
+    // box_data, exists = op.Box.get(TALLY_BOX_KEY)
+    byte "V"
+    box_get
+    // smart_contracts/voting_machine/contract.py:248
+    // assert exists
+    assert
+    // smart_contracts/voting_machine/contract.py:249
+    // current_vote = op.btoi(op.extract(box_data, index, VOTE_COUNT_BYTES))
+    frame_dig -1
+    int 8
+    extract3
+    btoi
+    // smart_contracts/voting_machine/contract.py:251
+    // op.Box.replace(TALLY_BOX_KEY, index, op.itob(current_vote + 1))
+    int 1
+    +
+    itob
+    byte "V"
+    frame_dig -1
+    uncover 2
+    box_replace
+    retsub
+
+
+// smart_contracts.voting_machine.contract.VotingRoundApp.__init__() -> void:
+__init__:
+    // smart_contracts/voting_machine/contract.py:44
+    // def __init__(self) -> None:
+    proto 0 0
+    // smart_contracts/voting_machine/contract.py:45
+    // self.is_bootstrapped = False
+    byte "is_bootstrapped"
+    int 0
+    app_global_put
+    // smart_contracts/voting_machine/contract.py:47-48
+    // # Minimum number of voters who voted
+    // self.voter_count = UInt64(0)
+    byte "voter_count"
+    int 0
+    app_global_put
+    retsub
